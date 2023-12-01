@@ -13,6 +13,7 @@ import br.com.cotiinformatica.domain.entities.Fornecedor;
 import br.com.cotiinformatica.domain.entities.Produto;
 import br.com.cotiinformatica.domain.interfaces.ProdutoService;
 import br.com.cotiinformatica.dtos.ProdutoPostDto;
+import br.com.cotiinformatica.dtos.ProdutoPutDto;
 import br.com.cotiinformatica.repositories.CategoriaRepository;
 import br.com.cotiinformatica.repositories.FornecedorRepository;
 import br.com.cotiinformatica.repositories.ProdutoRepository;
@@ -60,8 +61,22 @@ public class ProdutoServiceImpl implements ProdutoService {
 	}
 
 	@Override
-	public void update(Produto produto) throws Exception {
+	public void update(ProdutoPutDto dto) throws Exception {
+	
+		// preenhcher os dados do produto
+		Produto produto = findById(dto.getId());
+		
+		produto.setId(dto.getId());
+		produto.setNome(dto.getNome());
+		produto.setPreco(new BigDecimal(dto.getPreco()));
+		produto.setQuantidade(dto.getQuantidade());
+		produto.setDescricao(dto.getDescricao());
+		produto.setFornecedor(obterFornecedor(dto.getIdFornecedor()));
+		produto.setCategoria(obterCategoria(dto.getIdCategoria()));
+
+		// atuaizar no banco de dados
 		produtoRepository.save(produto);
+
 	}
 
 	@Override
@@ -77,6 +92,34 @@ public class ProdutoServiceImpl implements ProdutoService {
 
 	@Override
 	public Produto findById(UUID id) throws Exception {
+		Optional<Produto> produto = produtoRepository.findById(id);
+		if(produto.isEmpty())
+			throw new IllegalArgumentException("Produto não encontrado. Verifique o ID informado.");
+		
 		return produtoRepository.findById(id).get();
+	}
+	// método para buscar a categoria do produto
+	private Categoria obterCategoria(UUID id) {
+	
+		// buscando a categoria no banco de dados
+		Optional<Categoria> categoria = categoriaRepository.findById(id);
+	
+		// verificando se o fornecedor não foi encontrado
+		if (categoria.isEmpty())
+			throw new IllegalArgumentException("Erro. A categoria informada não existe.");
+	
+		return categoria.get();
+	}
+		// método para buscar o fornecedor do produto
+		private Fornecedor obterFornecedor(UUID id) {
+			
+		// buscando o fornecedor no banco de dados
+	Optional<Fornecedor> fornecedor = fornecedorRepository.findById(id);
+	
+		 // verificando se o fornecedor não foi encontrado
+		if (fornecedor.isEmpty())
+			throw new IllegalArgumentException("Erro. O fornecedor informado não existe.");
+
+		return fornecedor.get();
 	}
 }
