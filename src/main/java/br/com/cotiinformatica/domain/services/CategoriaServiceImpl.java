@@ -14,7 +14,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
 	@Autowired
 	CategoriaRepository categoriaRepository;
-
+	
 	@Override
 	public List<Categoria> findAll() throws Exception {
 		// retornar todas as categorias cadastradas
